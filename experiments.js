@@ -24,6 +24,8 @@ const types = [
   {
     type: 'datetime',
     checker: _.isDate,
+    pack: v => v.valueOf(),
+    unpack: v => new Date(v)
   },
   {
     type: 'array',
@@ -35,9 +37,10 @@ const types = [
   },
 ];
 
+const typesMap = _.keyBy(types, 'type')
 const typesNames = types.map(t => t.type);
-const typesCheckers = _.mapValues(_.keyBy(types, 'type'), 'checker');
-
+const typesCheckers = _.mapValues(typesMap, 'checker');
+const jsonNativeTypes = _.keyBy(types.filter(t => t.jsonNative), 'type');
 
 function detectTypeName (value) {
   return typesNames.find(tn => typesCheckers[tn](value)) || 'string'
@@ -65,9 +68,19 @@ function determineSchema (value, path = [], arr = []) {
   return arr
 }
 
-console.log(determineSchema({
+function packObject (obj) {
+  const notNative = determineSchema(obj).filter(({type}) => !jsonNativeTypes[type])
+  notNative.forEach(({path, type}) => {
+    const v = _.get(obj, path);
+    _.set(obj, path, typesMap[type].pack(v))
+  });
+  return [obj, notNative]
+}
+
+const x = packObject({
   qwe: 9,
   a: 'q',
   sss: [9, {s: null}],
-  ppp: {8: false, 77: new Date()}
-}))
+  ppp: {8: false, 77: 'r', p: {p: false, x: [9, new Date()]}}
+})
+console.log(x)
