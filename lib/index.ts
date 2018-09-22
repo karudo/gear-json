@@ -5,6 +5,10 @@ import isArray from 'lodash/isArray'
 import isBoolean from 'lodash/isBoolean'
 import isNull from 'lodash/isNull'
 
+import * as gearJson from './gj'
+
+export {gearJson}
+
 type TypeNumberName = 'number';
 type TypeStringName = 'string';
 type TypeObjectName = 'object';
@@ -12,7 +16,7 @@ type TypeArrayName = 'array';
 type TypeBooleanName = 'boolean';
 type TypeNull = 'null';
 
-export type JsonType = TypeNumberName | TypeStringName | TypeObjectName | TypeArrayName | TypeBooleanName | TypeNull;
+export type JsonNativeType = TypeNumberName | TypeStringName | TypeObjectName | TypeArrayName | TypeBooleanName | TypeNull;
 
 export const tnNumber: TypeNumberName = 'number';
 export const tnString: TypeStringName = 'string';
@@ -26,7 +30,7 @@ function floatVal (v: any): number {
   return isNaN(v) ? 0 : v;
 }
 
-export const checkers: {[T in JsonType]: (v: any) => boolean} = {
+export const checkers: {[T in JsonNativeType]: (v: any) => boolean} = {
   [tnNumber]: isNumber,
   [tnString]: isString,
   [tnObject]: isPlainObject,
@@ -51,9 +55,9 @@ export const defaults: {
   [tnNull]: () => null
 };
 
-export const typesNames: JsonType[] = [tnNumber, tnString, tnObject, tnArray, tnBoolean, tnNull];
+export const typesNames: JsonNativeType[] = [tnNumber, tnString, tnObject, tnArray, tnBoolean, tnNull];
 
-function detectTypeName (value: any): JsonType {
+function detectTypeName (value: any): JsonNativeType {
   return typesNames.find(tn => checkers[tn](value)) || tnString
 }
 
@@ -64,7 +68,7 @@ export type SchemaItemObjectProperty = {
 
 export type SchemaItem = {
   num: number,
-  type: JsonType,
+  type: JsonNativeType,
   properties?: SchemaItemObjectProperty[],
   items?: SchemaItem[]
 }
@@ -75,7 +79,7 @@ const optionsDefaults = {
 };
 
 let num: number = 0;
-export function createSchemaItem (type: JsonType, options?: any): SchemaItem {
+export function createSchemaItem (type: JsonNativeType, options?: any): SchemaItem {
   return {
     num: ++num,
     type,
