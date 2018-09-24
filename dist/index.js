@@ -2,6 +2,13 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const isNumber_1 = __importDefault(require("lodash/isNumber"));
 const isString_1 = __importDefault(require("lodash/isString"));
@@ -9,6 +16,8 @@ const isPlainObject_1 = __importDefault(require("lodash/isPlainObject"));
 const isArray_1 = __importDefault(require("lodash/isArray"));
 const isBoolean_1 = __importDefault(require("lodash/isBoolean"));
 const isNull_1 = __importDefault(require("lodash/isNull"));
+const gearJson = __importStar(require("./gj"));
+exports.gearJson = gearJson;
 exports.tnNumber = 'number';
 exports.tnString = 'string';
 exports.tnObject = 'object';

@@ -120,10 +120,9 @@ export function packObject (obj: object): PackedObject {
   return [serialized, notNativeTypes]
 }
 
-export function unpackObject (packedObj: PackedObject): PackedObject {
+export function unpackObject (packedObj: PackedObject): object {
   const [obj, types] = packedObj;
-  const deserialized = deserializeObject(obj, types);
-  return [deserialized, types]
+  return deserializeObject(obj, types);
 }
 
 export function packSingleSchemaCollection (items: object[], types: PackedSchema): PackedCollectionWithCommonSchema {
@@ -139,4 +138,14 @@ export function packDifferentSchemaCollection (items: object[]): PackedCollectio
     type: 2,
     items: items.map(item => packObject(item)),
   }
+}
+
+export function unpackCollection(coll: PackedCollectionWithCommonSchema | PackedCollectionWithDifferentSchema): object[] {
+  if (coll.type === 1) {
+    return coll.items.map(obj => deserializeObject(obj, coll.types))
+  }
+  if (coll.type === 2) {
+    return coll.items.map(unpackObject)
+  }
+  return []
 }
