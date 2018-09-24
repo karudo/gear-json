@@ -1,6 +1,6 @@
 {
   "name": "gear-json",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Gear JSON - a library for DBWatcher",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,10 +16,11 @@
   "license": "MIT",
   "devDependencies": {
     "@types/lodash": "^4.14.116",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.11",
     "typescript": "^3.0.3"
   },
   "peerDependencies": {
     "lodash": "^4.0.0"
-  }
+  },
+  "dependencies": {}
 }
