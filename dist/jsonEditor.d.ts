@@ -31,6 +31,7 @@ export declare const jsonNativeTypesNames: JsonNativeType[];
 export declare const extendTypesNames: ExtendType[];
 export declare function detectJsonNativeTypeName(value: any): JsonNativeType;
 export declare function detectExtendTypeName(value: any): ExtendType;
+export declare function createTypeDetector(types: ExtendType[]): (value: any) => ExtendType;
 declare type SchemaItemObjectProperty = {
     key: string;
     prop: SchemaItem;

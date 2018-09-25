@@ -49,6 +49,12 @@ function detectExtendTypeName(value) {
     return exports.extendTypesNames.find(tn => exports.checkers[tn](value)) || exports.tnString;
 }
 exports.detectExtendTypeName = detectExtendTypeName;
+function createTypeDetector(types) {
+    return function detectType(value) {
+        return types.find(tn => exports.checkers[tn](value)) || exports.tnString;
+    };
+}
+exports.createTypeDetector = createTypeDetector;
 let num = 0;
 function createSchemaScalarItem(type) {
     return {

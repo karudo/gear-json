@@ -1,6 +1,6 @@
 {
   "name": "gear-json",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Gear JSON - a library for DBWatcher",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

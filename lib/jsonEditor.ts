@@ -68,6 +68,11 @@ export function detectJsonNativeTypeName (value: any): JsonNativeType {
 export function detectExtendTypeName (value: any): ExtendType {
   return extendTypesNames.find(tn => checkers[tn](value)) || tnString
 }
+export function createTypeDetector (types: ExtendType[]) {
+  return function detectType (value: any) {
+    return types.find(tn => checkers[tn](value)) || tnString
+  }
+}
 
 type SchemaItemObjectProperty = {
   key: string,
