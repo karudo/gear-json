@@ -1,13 +1,13 @@
-declare type TypeNumberName = 'number';
-declare type TypeStringName = 'string';
-declare type TypeDateName = 'date';
-declare type TypeObjectName = 'object';
-declare type TypeArrayName = 'array';
-declare type TypeBooleanName = 'boolean';
-declare type TypeNullName = 'null';
-declare type JsonNativeType = TypeNumberName | TypeStringName | TypeObjectName | TypeArrayName | TypeBooleanName | TypeNullName;
-declare type ExtendType = JsonNativeType | TypeDateName;
-declare type ScalarType = TypeNumberName | TypeStringName | TypeBooleanName | TypeNullName | TypeDateName;
+export declare type TypeNumberName = 'number';
+export declare type TypeStringName = 'string';
+export declare type TypeDateName = 'date';
+export declare type TypeObjectName = 'object';
+export declare type TypeArrayName = 'array';
+export declare type TypeBooleanName = 'boolean';
+export declare type TypeNullName = 'null';
+export declare type JsonNativeType = TypeNumberName | TypeStringName | TypeObjectName | TypeArrayName | TypeBooleanName | TypeNullName;
+export declare type ExtendType = JsonNativeType | TypeDateName;
+export declare type ScalarType = TypeNumberName | TypeStringName | TypeBooleanName | TypeNullName | TypeDateName;
 export declare const tnNumber: TypeNumberName;
 export declare const tnString: TypeStringName;
 export declare const tnDate: TypeDateName;
@@ -32,29 +32,28 @@ export declare const extendTypesNames: ExtendType[];
 export declare function detectJsonNativeTypeName(value: any): JsonNativeType;
 export declare function detectExtendTypeName(value: any): ExtendType;
 export declare function createTypeDetector(types: ExtendType[]): (value: any) => ExtendType;
-declare type SchemaItemObjectProperty = {
+export declare type SchemaItemObjectProperty = {
     key: string;
     prop: SchemaItem;
 };
-declare type SchemaScalarItem = {
+export declare type SchemaScalarItem = {
     num: number;
     type: ScalarType;
 };
-declare type SchemaArrayItem = {
+export declare type SchemaArrayItem = {
     num: number;
     type: TypeArrayName;
     items: SchemaItem[];
 };
-declare type SchemaObjectItem = {
+export declare type SchemaObjectItem = {
     num: number;
     type: TypeObjectName;
     properties: SchemaItemObjectProperty[];
 };
-declare type SchemaItem = SchemaScalarItem | SchemaObjectItem | SchemaArrayItem;
+export declare type SchemaItem = SchemaScalarItem | SchemaObjectItem | SchemaArrayItem;
 export declare function createObjectProp(key: string, prop: SchemaItem): SchemaItemObjectProperty;
 export declare function createSchemaItem(type: ExtendType): SchemaItem;
 export declare function createSchemaDetector(detectTypeName: (json: any) => ExtendType): (json: any) => SchemaItem;
 export declare function generateVuexID(): string;
 export declare function getValueByPath(obj: any, path: any[]): any;
 export declare function getSchemaByPath(schema: SchemaItem, path: any[]): SchemaItem;
-export {};

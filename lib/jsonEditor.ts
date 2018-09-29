@@ -6,17 +6,17 @@ import isArray from 'lodash/isArray'
 import isBoolean from 'lodash/isBoolean'
 import isNull from 'lodash/isNull'
 
-type TypeNumberName = 'number';
-type TypeStringName = 'string';
-type TypeDateName = 'date';
-type TypeObjectName = 'object';
-type TypeArrayName = 'array';
-type TypeBooleanName = 'boolean';
-type TypeNullName = 'null';
+export type TypeNumberName = 'number';
+export type TypeStringName = 'string';
+export type TypeDateName = 'date';
+export type TypeObjectName = 'object';
+export type TypeArrayName = 'array';
+export type TypeBooleanName = 'boolean';
+export type TypeNullName = 'null';
 
-type JsonNativeType = TypeNumberName | TypeStringName | TypeObjectName | TypeArrayName | TypeBooleanName | TypeNullName;
-type ExtendType = JsonNativeType | TypeDateName;
-type ScalarType = TypeNumberName | TypeStringName | TypeBooleanName | TypeNullName | TypeDateName;
+export type JsonNativeType = TypeNumberName | TypeStringName | TypeObjectName | TypeArrayName | TypeBooleanName | TypeNullName;
+export type ExtendType = JsonNativeType | TypeDateName;
+export type ScalarType = TypeNumberName | TypeStringName | TypeBooleanName | TypeNullName | TypeDateName;
 
 export const tnNumber: TypeNumberName = 'number';
 export const tnString: TypeStringName = 'string';
@@ -74,29 +74,29 @@ export function createTypeDetector (types: ExtendType[]) {
   }
 }
 
-type SchemaItemObjectProperty = {
+export type SchemaItemObjectProperty = {
   key: string,
   prop: SchemaItem
 }
 
-type SchemaScalarItem  = {
+export type SchemaScalarItem  = {
   num: number,
   type: ScalarType,
 }
 
-type SchemaArrayItem = {
+export type SchemaArrayItem = {
   num: number,
   type: TypeArrayName,
   items: SchemaItem[]
 }
 
-type SchemaObjectItem = {
+export type SchemaObjectItem = {
   num: number,
   type: TypeObjectName,
   properties: SchemaItemObjectProperty[]
 }
 
-type SchemaItem = SchemaScalarItem | SchemaObjectItem | SchemaArrayItem;
+export type SchemaItem = SchemaScalarItem | SchemaObjectItem | SchemaArrayItem;
 
 let num: number = 0;
 
