@@ -8,6 +8,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const gearJson = __importStar(require("./gearJson"));
-exports.gearJson = gearJson;
 const jsonEditor = __importStar(require("./jsonEditor"));
 exports.jsonEditor = jsonEditor;
+exports.default = gearJson;
