@@ -22,7 +22,7 @@ type PackedObject = [object, PackedSchema];
 type PackedCollectionWithCommonSchema = {
   type: 1,
   items: object[],
-  types: PackedSchema,
+  schema: PackedSchema,
 }
 
 type PackedCollectionWithDifferentSchema = {
@@ -72,42 +72,44 @@ const typesNames = types.map(t => t.type);
 const typesCheckers = mapValues(typesMap, 'checker');
 const jsonNativeTypes = keyBy(types.filter(t => t.jsonNative), 'type');
 
-function detectTypeName (value: any): string {
-  return typesNames.find(tn => typesCheckers[tn](value)) || 'string'
-}
-
-function determineSchema (value: any, path: PathItemType[] = [], arr: PackedTypeInfo[] = []) {
-  const type = detectTypeName(value);
-  switch (type) {
-    case 'array':
-      for (let i = 0; i < value.length; i++) {
-        determineSchema(value[i], [...path, i], arr)
-      }
-      break;
-    case 'object':
-      for (const k in value) {
-        determineSchema(value[k], [...path, k], arr)
-      }
-      break;
-    default:
-      arr.push({
-        path,
-        type
-      })
+function createSchemaDeterminator (types: any[]) {
+  function detectTypeName (value: any): string {
+    return typesNames.find(tn => typesCheckers[tn](value)) || 'string'
   }
-  return arr
+
+  return function determineSchema (value: any, path: PathItemType[] = [], arr: PackedTypeInfo[] = []) {
+    const type = detectTypeName(value);
+    switch (type) {
+      case 'array':
+        for (let i = 0; i < value.length; i++) {
+          determineSchema(value[i], [...path, i], arr)
+        }
+        break;
+      case 'object':
+        for (const k in value) {
+          determineSchema(value[k], [...path, k], arr)
+        }
+        break;
+      default:
+        arr.push({
+          path,
+          type
+        })
+    }
+    return arr
+  }
 }
 
-function serializeObject (obj: object, types: PackedSchema): object {
-  types.forEach(({path, type}) => {
+function serializeObject (obj: object, schema: PackedSchema): object {
+  schema.forEach(({path, type}) => {
     const v = get(obj, path);
     set(obj, path, (typesMap[type] as any).serialize(v))
   });
   return obj;
 }
 
-function deserializeObject (obj: object, types: PackedSchema): object {
-  types.forEach(({path, type}) => {
+function deserializeObject (obj: object, schema: PackedSchema): object {
+  schema.forEach(({path, type}) => {
     const v = get(obj, path);
     set(obj, path, (typesMap[type] as any).deserialize(v))
   });
@@ -129,7 +131,7 @@ export function packSingleSchemaCollection (items: object[], types: PackedSchema
   return {
     type: 1,
     items: items.map(item => serializeObject(item, types)),
-    types: types,
+    schema: types,
   }
 }
 
@@ -142,10 +144,14 @@ export function packDifferentSchemaCollection (items: object[]): PackedCollectio
 
 export function unpackCollection(coll: PackedCollectionWithCommonSchema | PackedCollectionWithDifferentSchema): object[] {
   if (coll.type === 1) {
-    return coll.items.map(obj => deserializeObject(obj, coll.types))
+    return coll.items.map(obj => deserializeObject(obj, coll.schema))
   }
   if (coll.type === 2) {
     return coll.items.map(unpackObject)
   }
   return []
+}
+
+export class GearJsonFactory {
+
 }
