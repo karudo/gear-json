@@ -14,7 +14,7 @@ const isArray_1 = __importDefault(require("lodash/isArray"));
 const isBoolean_1 = __importDefault(require("lodash/isBoolean"));
 const isNull_1 = __importDefault(require("lodash/isNull"));
 const isDate_1 = __importDefault(require("lodash/isDate"));
-const types = [
+const baseTypes = [
     {
         type: 'number',
         checker: isNumber_1.default,
@@ -50,81 +50,81 @@ const types = [
         checker: isPlainObject_1.default,
     },
 ];
-const typesMap = keyBy_1.default(types, 'type');
-const typesNames = types.map(t => t.type);
-const typesCheckers = mapValues_1.default(typesMap, 'checker');
-const jsonNativeTypes = keyBy_1.default(types.filter(t => t.jsonNative), 'type');
-function detectTypeName(value) {
-    return typesNames.find(tn => typesCheckers[tn](value)) || 'string';
-}
-function determineSchema(value, path = [], arr = []) {
-    const type = detectTypeName(value);
-    switch (type) {
-        case 'array':
-            for (let i = 0; i < value.length; i++) {
-                determineSchema(value[i], [...path, i], arr);
-            }
-            break;
-        case 'object':
-            for (const k in value) {
-                determineSchema(value[k], [...path, k], arr);
-            }
-            break;
-        default:
-            arr.push({
-                path,
-                type
-            });
+class GearJson {
+    constructor(extendTypes = []) {
+        this.types = [...extendTypes, ...baseTypes];
+        this.typesMap = keyBy_1.default(this.types, 'type');
+        this.typesNames = this.types.map(t => t.type);
+        this.typesCheckers = mapValues_1.default(this.typesMap, 'checker');
+        this.jsonNativeTypes = keyBy_1.default(this.types.filter(t => t.jsonNative), 'type');
     }
-    return arr;
-}
-function serializeObject(obj, types) {
-    types.forEach(({ path, type }) => {
-        const v = get_1.default(obj, path);
-        set_1.default(obj, path, typesMap[type].serialize(v));
-    });
-    return obj;
-}
-function deserializeObject(obj, types) {
-    types.forEach(({ path, type }) => {
-        const v = get_1.default(obj, path);
-        set_1.default(obj, path, typesMap[type].deserialize(v));
-    });
-    return obj;
-}
-function packObject(obj) {
-    const notNativeTypes = determineSchema(obj).filter(({ type }) => !jsonNativeTypes[type]);
-    const serialized = serializeObject(obj, notNativeTypes);
-    return [serialized, notNativeTypes];
-}
-exports.packObject = packObject;
-function unpackObject(packedObj) {
-    const [obj, types] = packedObj;
-    return deserializeObject(obj, types);
-}
-exports.unpackObject = unpackObject;
-function packSingleSchemaCollection(items, types) {
-    return {
-        type: 1,
-        items: items.map(item => serializeObject(item, types)),
-        types: types,
-    };
-}
-exports.packSingleSchemaCollection = packSingleSchemaCollection;
-function packDifferentSchemaCollection(items) {
-    return {
-        type: 2,
-        items: items.map(item => packObject(item)),
-    };
-}
-exports.packDifferentSchemaCollection = packDifferentSchemaCollection;
-function unpackCollection(coll) {
-    if (coll.type === 1) {
-        return coll.items.map(obj => deserializeObject(obj, coll.types));
+    detectTypeName(value) {
+        return this.typesNames.find(tn => this.typesCheckers[tn](value)) || 'string';
     }
-    if (coll.type === 2) {
-        return coll.items.map(unpackObject);
+    determineSchema(value, path = [], arr = []) {
+        const type = this.detectTypeName(value);
+        switch (type) {
+            case 'array':
+                for (let i = 0; i < value.length; i++) {
+                    this.determineSchema(value[i], [...path, i], arr);
+                }
+                break;
+            case 'object':
+                for (const k in value) {
+                    this.determineSchema(value[k], [...path, k], arr);
+                }
+                break;
+            default:
+                arr.push({
+                    path,
+                    type
+                });
+        }
+        return arr;
     }
-    return [];
+    serializeObject(obj, types) {
+        types.forEach(({ path, type }) => {
+            const v = get_1.default(obj, path);
+            set_1.default(obj, path, this.typesMap[type].serialize(v));
+        });
+        return obj;
+    }
+    deserializeObject(obj, types) {
+        types.forEach(({ path, type }) => {
+            const v = get_1.default(obj, path);
+            set_1.default(obj, path, this.typesMap[type].deserialize(v));
+        });
+        return obj;
+    }
+    packObject(obj) {
+        const notNativeTypes = this.determineSchema(obj).filter(({ type }) => !this.jsonNativeTypes[type]);
+        const serialized = this.serializeObject(obj, notNativeTypes);
+        return [serialized, notNativeTypes];
+    }
+    unpackObject([obj, types]) {
+        return this.deserializeObject(obj, types);
+    }
+    packSingleSchemaCollection(items, types) {
+        return {
+            type: 1,
+            items: items.map(item => this.serializeObject(item, types)),
+            types: types,
+        };
+    }
+    packDifferentSchemaCollection(items) {
+        return {
+            type: 2,
+            items: items.map(item => this.packObject(item)),
+        };
+    }
+    unpackCollection(coll) {
+        if (coll.type === 1) {
+            return coll.items.map(obj => this.deserializeObject(obj, coll.types));
+        }
+        if (coll.type === 2) {
+            return coll.items.map(obj => this.unpackObject(obj));
+        }
+        return [];
+    }
 }
-exports.unpackCollection = unpackCollection;
+exports.GearJson = GearJson;

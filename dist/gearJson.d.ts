@@ -14,9 +14,21 @@ declare type PackedCollectionWithDifferentSchema = {
     type: 2;
     items: PackedObject[];
 };
-export declare function packObject(obj: object): PackedObject;
-export declare function unpackObject(packedObj: PackedObject): object;
-export declare function packSingleSchemaCollection(items: object[], types: PackedSchema): PackedCollectionWithCommonSchema;
-export declare function packDifferentSchemaCollection(items: object[]): PackedCollectionWithDifferentSchema;
-export declare function unpackCollection(coll: PackedCollectionWithCommonSchema | PackedCollectionWithDifferentSchema): object[];
+export declare class GearJson {
+    private types;
+    private typesMap;
+    private typesNames;
+    private typesCheckers;
+    private jsonNativeTypes;
+    constructor(extendTypes?: never[]);
+    detectTypeName(value: any): string;
+    determineSchema(value: any, path?: PathItemType[], arr?: PackedTypeInfo[]): PackedTypeInfo[];
+    serializeObject(obj: object, types: PackedSchema): object;
+    deserializeObject(obj: object, types: PackedSchema): object;
+    packObject(obj: object): PackedObject;
+    unpackObject([obj, types]: PackedObject): object;
+    packSingleSchemaCollection(items: object[], types: PackedSchema): PackedCollectionWithCommonSchema;
+    packDifferentSchemaCollection(items: object[]): PackedCollectionWithDifferentSchema;
+    unpackCollection(coll: PackedCollectionWithCommonSchema | PackedCollectionWithDifferentSchema): object[];
+}
 export {};

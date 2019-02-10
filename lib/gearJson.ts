@@ -30,7 +30,15 @@ type PackedCollectionWithDifferentSchema = {
   items: PackedObject[],
 }
 
-const types = [
+type TypeDesc = {
+  type: string
+  checker: (a: any) => boolean
+  jsonNative?: boolean
+  serialize?: (a: any) => any
+  deserialize?: (a: any) => any
+}
+
+const baseTypes: TypeDesc[] = [
   {
     type: 'number',
     checker: isNumber,
@@ -67,85 +75,95 @@ const types = [
   },
 ];
 
-const typesMap = keyBy(types, 'type');
-const typesNames = types.map(t => t.type);
-const typesCheckers = mapValues(typesMap, 'checker');
-const jsonNativeTypes = keyBy(types.filter(t => t.jsonNative), 'type');
+export class GearJson {
+  private types: TypeDesc[];
+  private typesMap: {[key: string]: TypeDesc};
+  private typesNames: string[];
+  private typesCheckers: {[key: string]: (a: any) => boolean};
+  private jsonNativeTypes: {[key: string]: TypeDesc};
 
-function detectTypeName (value: any): string {
-  return typesNames.find(tn => typesCheckers[tn](value)) || 'string'
-}
-
-function determineSchema (value: any, path: PathItemType[] = [], arr: PackedTypeInfo[] = []) {
-  const type = detectTypeName(value);
-  switch (type) {
-    case 'array':
-      for (let i = 0; i < value.length; i++) {
-        determineSchema(value[i], [...path, i], arr)
-      }
-      break;
-    case 'object':
-      for (const k in value) {
-        determineSchema(value[k], [...path, k], arr)
-      }
-      break;
-    default:
-      arr.push({
-        path,
-        type
-      })
+  constructor (extendTypes = []) {
+    this.types = [...extendTypes, ...baseTypes]
+    this.typesMap = keyBy(this.types, 'type');
+    this.typesNames = this.types.map(t => t.type);
+    this.typesCheckers = mapValues(this.typesMap, 'checker');
+    this.jsonNativeTypes = keyBy(this.types.filter(t => t.jsonNative), 'type');
   }
-  return arr
-}
 
-function serializeObject (obj: object, types: PackedSchema): object {
-  types.forEach(({path, type}) => {
-    const v = get(obj, path);
-    set(obj, path, (typesMap[type] as any).serialize(v))
-  });
-  return obj;
-}
-
-function deserializeObject (obj: object, types: PackedSchema): object {
-  types.forEach(({path, type}) => {
-    const v = get(obj, path);
-    set(obj, path, (typesMap[type] as any).deserialize(v))
-  });
-  return obj;
-}
-
-export function packObject (obj: object): PackedObject {
-  const notNativeTypes = determineSchema(obj).filter(({type}) => !jsonNativeTypes[type]);
-  const serialized = serializeObject(obj, notNativeTypes);
-  return [serialized, notNativeTypes]
-}
-
-export function unpackObject (packedObj: PackedObject): object {
-  const [obj, types] = packedObj;
-  return deserializeObject(obj, types);
-}
-
-export function packSingleSchemaCollection (items: object[], types: PackedSchema): PackedCollectionWithCommonSchema {
-  return {
-    type: 1,
-    items: items.map(item => serializeObject(item, types)),
-    types: types,
+  detectTypeName (value: any): string {
+    return this.typesNames.find(tn => this.typesCheckers[tn](value)) || 'string'
   }
-}
 
-export function packDifferentSchemaCollection (items: object[]): PackedCollectionWithDifferentSchema {
-  return {
-    type: 2,
-    items: items.map(item => packObject(item)),
+  determineSchema (value: any, path: PathItemType[] = [], arr: PackedTypeInfo[] = []) {
+    const type = this.detectTypeName(value);
+    switch (type) {
+      case 'array':
+        for (let i = 0; i < value.length; i++) {
+          this.determineSchema(value[i], [...path, i], arr)
+        }
+        break;
+      case 'object':
+        for (const k in value) {
+          this.determineSchema(value[k], [...path, k], arr)
+        }
+        break;
+      default:
+        arr.push({
+          path,
+          type
+        })
+    }
+    return arr
   }
-}
 
-export function unpackCollection(coll: PackedCollectionWithCommonSchema | PackedCollectionWithDifferentSchema): object[] {
-  if (coll.type === 1) {
-    return coll.items.map(obj => deserializeObject(obj, coll.types))
+  serializeObject (obj: object, types: PackedSchema): object {
+    types.forEach(({path, type}) => {
+      const v = get(obj, path);
+      set(obj, path, (this.typesMap[type] as any).serialize(v))
+    });
+    return obj;
   }
-  if (coll.type === 2) {
-    return coll.items.map(unpackObject)
+
+  deserializeObject (obj: object, types: PackedSchema): object {
+    types.forEach(({path, type}) => {
+      const v = get(obj, path);
+      set(obj, path, (this.typesMap[type] as any).deserialize(v))
+    });
+    return obj;
   }
-  return []
+
+  packObject (obj: object): PackedObject {
+    const notNativeTypes = this.determineSchema(obj).filter(({type}) => !this.jsonNativeTypes[type]);
+    const serialized = this.serializeObject(obj, notNativeTypes);
+    return [serialized, notNativeTypes]
+  }
+
+  unpackObject ([obj, types]: PackedObject): object {
+    return this.deserializeObject(obj, types);
+  }
+
+  packSingleSchemaCollection (items: object[], types: PackedSchema): PackedCollectionWithCommonSchema {
+    return {
+      type: 1,
+      items: items.map(item => this.serializeObject(item, types)),
+      types: types,
+    }
+  }
+
+  packDifferentSchemaCollection (items: object[]): PackedCollectionWithDifferentSchema {
+    return {
+      type: 2,
+      items: items.map(item => this.packObject(item)),
+    }
+  }
+
+  unpackCollection(coll: PackedCollectionWithCommonSchema | PackedCollectionWithDifferentSchema): object[] {
+    if (coll.type === 1) {
+      return coll.items.map(obj => this.deserializeObject(obj, coll.types))
+    }
+    if (coll.type === 2) {
+      return coll.items.map(obj => this.unpackObject(obj))
+    }
+    return []
+  }
 }
