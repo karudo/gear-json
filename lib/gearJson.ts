@@ -30,7 +30,7 @@ type PackedCollectionWithDifferentSchema = {
   items: PackedObject[],
 }
 
-type TypeDesc = {
+export type TypeDesc = {
   type: string
   checker: (a: any) => boolean
   jsonNative?: boolean
@@ -82,7 +82,7 @@ export class GearJson {
   private typesCheckers: {[key: string]: (a: any) => boolean};
   private jsonNativeTypes: {[key: string]: TypeDesc};
 
-  constructor (extendTypes = []) {
+  constructor (extendTypes: TypeDesc[] = []) {
     this.types = [...extendTypes, ...baseTypes]
     this.typesMap = keyBy(this.types, 'type');
     this.typesNames = this.types.map(t => t.type);

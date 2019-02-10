@@ -14,13 +14,20 @@ declare type PackedCollectionWithDifferentSchema = {
     type: 2;
     items: PackedObject[];
 };
+export declare type TypeDesc = {
+    type: string;
+    checker: (a: any) => boolean;
+    jsonNative?: boolean;
+    serialize?: (a: any) => any;
+    deserialize?: (a: any) => any;
+};
 export declare class GearJson {
     private types;
     private typesMap;
     private typesNames;
     private typesCheckers;
     private jsonNativeTypes;
-    constructor(extendTypes?: never[]);
+    constructor(extendTypes?: TypeDesc[]);
     detectTypeName(value: any): string;
     determineSchema(value: any, path?: PathItemType[], arr?: PackedTypeInfo[]): PackedTypeInfo[];
     serializeObject(obj: object, types: PackedSchema): object;
