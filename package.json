@@ -15,9 +15,9 @@
   "author": "Deonis Peretyagin <karudo@gmail.com> (https://github.com/karudo)",
   "license": "MIT",
   "devDependencies": {
-    "@types/lodash": "^4.14.120",
-    "lodash": "^4.17.11",
-    "typescript": "^3.3.3"
+    "@types/lodash": "^4.14.136",
+    "lodash": "^4.17.14",
+    "typescript": "^3.5.3"
   },
   "peerDependencies": {
     "lodash": "^4.0.0"
